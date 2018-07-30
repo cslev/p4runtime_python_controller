@@ -32,6 +32,15 @@ class SwitchConnection(object):
     def buildDeviceConfig(self, **kwargs):
         return p4config_pb2.P4DeviceConfig()
 
+    def GetForwardingPipelineConfig(self, **kwargs):
+        # device_config = self.buildDeviceConfig(**kwargs)
+        request = p4runtime_pb2.GetForwardingPipelineConfigRequest()
+        request.device_id = self.device_id
+
+        print(self.client_stub.GetForwardingPipelineConfig(request))
+        # print request
+
+
     def SetForwardingPipelineConfig(self, p4info, dry_run=False, **kwargs):
         device_config = self.buildDeviceConfig(**kwargs)
         request = p4runtime_pb2.SetForwardingPipelineConfigRequest()
