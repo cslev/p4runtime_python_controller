@@ -121,6 +121,7 @@ class P4InfoHelper(object):
 
     def get_match_field_value(self, match_field):
         match_type = match_field.WhichOneof("field_match_type")
+        # according to the specification there is no match_type 'valid' 
         if match_type == 'valid':
             return match_field.valid.value
         elif match_type == 'exact':

@@ -45,6 +45,7 @@ class SwitchConnection(object):
         device_config = self.buildDeviceConfig(**kwargs)
         request = p4runtime_pb2.SetForwardingPipelineConfigRequest()
         request.device_id = self.device_id
+        # request.role_id = 0
         config = request.config
         config.p4info.CopyFrom(p4info)
         config.p4_device_config = device_config.SerializeToString()
@@ -65,15 +66,42 @@ class SwitchConnection(object):
         else:
             self.client_stub.Write(request)
 
-    def ReadTableEntries(self, table_id=None, dry_run=False):
+    def ReadTableEntries(self, dry_run=False, **kwargs):
+        '''
+        :param table_id: If default (0), entries from all tables will be selected and no other filter can be used. Otherwise only the specified table will be considered.
+
+        :param match: If default (unset), all entries from the specified table will be considered. Otherwise, results will be filtered based on the provided match key, which must be a valid match key for the table. The match will be exact, which means at most one entry will be returned. (NOT WORKING)
+
+        :param action: If default (unset), all entries from the specified table will be considered. Otherwise, the client can provide an action_id (for direct tables), which will be use to filter table entries. For this P4Runtime release, this is the only kind of action-based filtering we support: the client cannot filter based on action parameter values and cannot filter indirect table entries based on action profile member id / action profile group id. (NOT WORKING)
+
+        :param priority: If default (0), all entries from the specified table will be considered. Otherwise, results will be filtered based on the provided priority value.
+
+        :param controller_metadata: If default (0), all entries from the specified table will be considered. Otherwise, results will be filtered based on the provided controller_metadata value.
+
+        :param is_default_action: If default (false), all non-default entries from the specified table will be considered. Otherwise, only the default entry will be considered.
+        '''
+
+        table_id = kwargs.get("table_id", 0)
+        match = kwargs.get("match", None)
+        action = kwargs.get("action", None)
+        priority = kwargs.get("priority", 0)
+        controller_metadata = kwargs.get("controller_metadata", 0)
+        is_default_action = kwargs.get("is_default_action", False)
+
         request = p4runtime_pb2.ReadRequest()
         request.device_id = self.device_id
         entity = request.entities.add()
         table_entry = entity.table_entry
-        if table_id is not None:
-            table_entry.table_id = table_id
-        else:
-            table_entry.table_id = 0
+        # set params (defaults are used according to P4Runtime spec)
+        table_entry.table_id = table_id
+        # match = table_entry.match.add()
+        # match.match = match
+        # table_entry.match = match
+        # table_entry.action = action
+        table_entry.priority = priority
+        table_entry.controller_metadata = controller_metadata
+        table_entry.is_default_action = is_default_action
+
         if dry_run:
             print "P4 Runtime Read:", request
         else:
