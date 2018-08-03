@@ -42,18 +42,33 @@ def addVLANforwardRule(p4info_helper, sw, vlan, incoming_port, output_port):
     print ("VLAN FORWARDING RULE IS INSTALLED:")
     # print "Matching on {}/32, action {} called with arguments (MAC: {}, OUTPUT_PORT: {}".format(ip_to_match,action_func,next_hop_mac,output_port)
 
-def readTableRules(p4info_helper, sw, table_name):
+def readTableRules(p4info_helper, sw, **kwargs):
     '''
     Reads the table entries from all tables on the switch.
     :param p4info_helper: the P4Info helper
     :param sw: the switch connection
+
+    :param table_name: Name of the table to filter
+    :param match: table entries that match on 'match' (NOT WORKING)
+    :param action: table entries that have the action 'action' (NOT WORKING)
+    :param priority: table entries that have the priority 'priority'
+    :param controller_metadata: table entries that have controller_metadata 'controller_metadata'
+    :param is_default_action: table entries that have default action'
     '''
+    table_name = kwargs.get("table_name", 0)
+
     print '\n----- Reading tables rules for %s -----' % sw.name
     if table_name != "ALL":
         tid=p4info_helper.get_tables_id(table_name)
-        entries = sw.ReadTableEntries(table_id=tid)
     else:
-        entries = sw.ReadTableEntries()
+        tid=0
+
+    entries = sw.ReadTableEntries(table_id=tid,
+                                match=kwargs.get("match", None),
+                                action=kwargs.get("action", None),
+                                priority=kwargs.get("priority", 0),
+                                controller_metadata=kwargs.get("controller_metadata",0),
+                                is_default_action=kwargs.get("is_default_action",False))
 
     for response in entries:
         for entity in response.entities:
@@ -125,7 +140,10 @@ def main(**kwargs):
     if vlanrule:
         addVLANforwardRule(p4info_helper, s, 100, 0 , 0)
     if table_name is not None:
-        readTableRules(p4info_helper, s, table_name)
+        readTableRules(p4info_helper,
+                        s,
+                        table_name=table_name,
+                        priority=100)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='P4Runtime Controller')
@@ -169,5 +187,5 @@ if __name__ == '__main__':
         set_forwarding = args.set_forwarding,
         get_forwarding = args.get_forwarding,
         portfwd = args.add_portfwd,
-        read_table = args.read_table,
+        table_name = args.read_table,
         vlanrule = args.add_vlanrule)
