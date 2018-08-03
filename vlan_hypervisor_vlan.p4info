@@ -1,0 +1,129 @@
+tables {
+  preamble {
+    id: 33590192
+    name: "MyIngress.vlan_incoming_exact"
+    alias: "vlan_incoming_exact"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.ingress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.vlan.vid"
+    bitwidth: 12
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16777996
+  }
+  action_refs {
+    id: 16805608
+  }
+  size: 1024
+  idle_timeout_behavior: NO_TIMEOUT
+}
+tables {
+  preamble {
+    id: 33586225
+    name: "MyIngress.arp_exact"
+    alias: "arp_exact"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.arp.dst_ip"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16826802
+  }
+  action_refs {
+    id: 16805608
+  }
+  size: 1024
+  idle_timeout_behavior: NO_TIMEOUT
+}
+tables {
+  preamble {
+    id: 33574068
+    name: "MyIngress.ipv4_lpm"
+    alias: "ipv4_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dstAddr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 16799317
+  }
+  action_refs {
+    id: 16805608
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+  idle_timeout_behavior: NO_TIMEOUT
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16805608
+    name: "MyIngress.drop"
+    alias: "drop"
+  }
+}
+actions {
+  preamble {
+    id: 16777996
+    name: "MyIngress.vlan_incoming_forward"
+    alias: "vlan_incoming_forward"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 16826802
+    name: "MyIngress.arp_reply"
+    alias: "arp_reply"
+  }
+  params {
+    id: 1
+    name: "request_mac"
+    bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 16799317
+    name: "MyIngress.ipv4_forward"
+    alias: "ipv4_forward"
+  }
+  params {
+    id: 1
+    name: "dstAddr"
+    bitwidth: 48
+  }
+  params {
+    id: 2
+    name: "port"
+    bitwidth: 9
+  }
+}
+type_info {
+}
